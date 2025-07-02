@@ -1,8 +1,9 @@
 from django.db.models import F, Q, Count, Sum
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
+from django.core.paginator import Paginator, EmptyPage
 
 from .form_dates import Ymd
 from .forms import *
@@ -237,10 +238,27 @@ class RoomDetailsView(View):
 
 
 class RoomsView(View):
+    NUM_ROOMS_FOR_PAGE = 10
+    
     def get(self, request):
         # renders a list of rooms
-        rooms = Room.objects.all().values("name", "room_type__name", "id")
+        query = request.GET.dict()
+        filter_rooms = query.get("filter-rooms", "")
+        
+        rooms = Room.objects.all()
+        
+        if filter_rooms:
+            rooms = rooms.filter(name__icontains=filter_rooms)
+
+        paginator = Paginator(rooms, self.NUM_ROOMS_FOR_PAGE)
+        page_number = request.GET.get('page', 1)
+        try:
+            rooms_page = paginator.page(page_number)
+        except EmptyPage:
+            return HttpResponseRedirect(f"{request.path}?page=1")
+        
         context = {
-            'rooms': rooms
+            'rooms': rooms_page,
+            'rooms_counts': rooms.count()
         }
         return render(request, "rooms.html", context)

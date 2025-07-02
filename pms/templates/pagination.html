@@ -1,0 +1,27 @@
+<div class="my-4 fs-5 text-secondary fw-medium">
+    <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+
+        {% if page.has_previous %}
+        <a href="?page={{ page.previous_page_number }}" class="btn btn-outline-primary btn-sm">
+            &laquo; Anterior
+        </a>
+        {% endif %}
+
+        <div class="d-flex align-items-center gap-2">
+        <span>Página</span>
+        <span class="badge bg-primary text-white px-3 py-2 rounded-pill">
+            {{ page.number }}
+        </span>
+        <span>de</span>
+        <span class="fw-semibold">{{ page.paginator.num_pages }}</span>
+        </div>
+
+        {% if page.has_next %}
+        <a href="?page={{ page.next_page_number }}" class="btn btn-outline-primary btn-sm">
+            Siguiente &raquo;
+        </a>
+        {% endif %}
+
+    </div>
+</div>
+
