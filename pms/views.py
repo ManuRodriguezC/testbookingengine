@@ -249,6 +249,8 @@ class RoomsView(View):
         
         if filter_rooms:
             rooms = rooms.filter(name__icontains=filter_rooms)
+            
+        rooms = rooms.order_by('name')
 
         paginator = Paginator(rooms, self.NUM_ROOMS_FOR_PAGE)
         page_number = request.GET.get('page', 1)
