@@ -178,6 +178,7 @@ class EditBookingView(View):
 class DashboardView(View):
     def get(self, request):
         from datetime import date, time, datetime
+        import calendar
         today = date.today()
 
         # get bookings created today
@@ -209,14 +210,57 @@ class DashboardView(View):
                     .exclude(state="DEL")
                     .aggregate(Sum('total'))
                     )
+        
+        # get the occupancy for each day of the month
+        num_rooms = Room.objects.count()
+        occupation_day_in_month = []
+        year = today.year
+        month = today.month
+        _, max_day = calendar.monthrange(year, month)
+        
+        # list day left in the month
+        days_left = [day for day in range(today.day, max_day + 1)]
+        
+        start_date = datetime(year, month, 1)
+        end_date = datetime(year, month, max_day)
+        
+        # list bookings in the current month
+        bookings_in_month = Booking.objects.filter(
+            checkin__lte=end_date,
+            checkout__gte=start_date,
+            state="NEW"
+        )
+        
+        # Occupation for day
+        occupation_map = {day: 0 for day in range(1, max_day + 1)}
+        
+        # Loop booking in the month and count the occupation
+        for booking in bookings_in_month:
+            for day in range(
+                max(booking.checkin.day, 1),
+                min(booking.checkout.day, max_day) + 1
+            ):
+                occupation_map[day] += 1
 
+        if num_rooms > 0:
+            # calculate the occupation percentage for each day
+            occupation_day_in_month = [
+                {
+                    'day': day,
+                    'occupation': (occupation_map[day] * 100) / num_rooms if day in days_left else ""
+                }
+                for day in range(1, max_day + 1)
+            ]
+        
         # preparing context data
         dashboard = {
             'new_bookings': new_bookings,
             'incoming_guests': incoming,
             'outcoming_guests': outcoming,
-            'invoiced': invoiced
-
+            'invoiced': invoiced,
+            'calendar_occupation': occupation_day_in_month,
+            'current_day': today.day,
+            'num_rooms': num_rooms,
         }
 
         context = {

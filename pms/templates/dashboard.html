@@ -3,25 +3,70 @@
 {% block content %}
 <h1>Dashboard</h1>
 <div class="card">
-    <h5 class="card-header">Hoy</h5>
-    <div class="d-flex justify-content-evenly pt-5 pb-5">
-        <div class="card text-white p-3 card-customization" style="background-color: #1000ff;">
-            <h5 class="small">Reservas hechas</h5>
-            <h1 class="dashboard-value">{{dashboard.new_bookings}}</h1>
-        </div>
-        <div class="card text-white p-3 card-customization" style="background-color: #00ab74;">
-            <h5 class="small">Huéspedes ingresando</h5>
-            <h1 class="dashboard-value">{{dashboard.incoming_guests}}</h1>
-        </div>
-        <div class="card text-white p-3 card-customization" style="background-color: #eeb258;">
-            <h5 class="small">Huéspedes saliendo</h5>
-            <h1 class="dashboard-value">{{dashboard.outcoming_guests}}</h1>
+    <div class="row p-4">
+        <div class="col-md-4 text-center">
+            <div class="card d-inline-block">
+                <h5 class="card-header">Hoy</h5>
+                <div class="d-grid gap-3 p-3">
+                    <div class="card text-white p-3 card-customization" style="background-color: #1000ff;">
+                        <h5 class="small">Reservas hechas</h5>
+                        <h1 class="dashboard-value">{{dashboard.new_bookings}}</h1>
+                    </div>
+                    <div class="card text-white p-3 card-customization" style="background-color: #00ab74;">
+                        <h5 class="small">Huéspedes ingresando</h5>
+                        <h1 class="dashboard-value">{{dashboard.incoming_guests}}</h1>
+                    </div>
+                    <div class="card text-white p-3 card-customization" style="background-color: #eeb258;">
+                        <h5 class="small">Huéspedes saliendo</h5>
+                        <h1 class="dashboard-value">{{dashboard.outcoming_guests}}</h1>
+                    </div>
+                    
+                    <div class="card text-white p-3 card-customization" style="background-color: #ff7f7f;">
+                        <h5 class="small">Total facturado</h5>
+                        <h1 class="dashboard-value">€ {% if dashboard.invoiced.total_sum == None %}0.00{% endif %} {{dashboard.invoiced.total_sum|floatformat:2}}</h1>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card text-white p-3 card-customization" style="background-color: #ff7f7f;">
-            <h5 class="small">Total facturado</h5>
-            <h1 class="dashboard-value">€ {% if dashboard.invoiced.total__sum == None %}0.00{% endif %} {{dashboard.invoiced.total__sum|floatformat:2}}</h1>
+        <div class="col-md-8 text-center">
+            <div class="card w-100">
+                <h5 class="card-header">Porcentaje de ocupación en el mes</h5>
+                {% if dashboard.num_rooms > 0 %}
+                    <div class="calendar-grid p-2">
+                    {% for day in dashboard.calendar_occupation %}
+                        <div class="calendar-cell 
+                            {% if day.occupation == "" or day.occupation == 100 %}
+                                bg-empty
+                            {% elif day.occupation >= 95 %}
+                                bg-full
+                            {% elif day.occupation > 50 and day.occupation < 95 %}
+                                bg-medium
+                            {% elif day.day == dashboard.current_day %}
+                                bg-current
+                            {% else %}
+                                bg-low
+                            {% endif %}
+                        ">
+                        <div class="calendar-day">
+                            {% if day.day == dashboard.current_day %}
+                                Hoy  
+                            {% endif %}
+                            {{ day.day }}
+                        </div>
+
+                        {% if day.occupation != "" %}
+                            <div class="calendar-content">{{ day.occupation|floatformat:0 }}%</div>
+                        {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                        <p class="mt-2">No cuenta con ninguna habitacion registrada</p>
+                {% endif %}
+                </div>
+            </div>
         </div>
     </div>
+
 </div>
 {% endblock content%}
