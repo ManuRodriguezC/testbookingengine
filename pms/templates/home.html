@@ -73,7 +73,14 @@
                 <div class="col">
 
                     {% if booking.state != "DEL" %}
-                    <a href="{% url 'delete_booking' pk=booking.id%} " >Cancelar reserva</a>
+                    <div class="d-flex flex-row justify-content-end gap-2">
+                        <a
+                            class="btn btn-primary"
+                            href="{% url 'edit_booking_date' pk=booking.id%} " >Cambiar fecha</a>
+                        <a
+                            class="btn btn-danger"
+                            href="{% url 'delete_booking' pk=booking.id%} " >Cancelar reserva</a>
+                    </div>
                     {% endif %}
                 </div>
 

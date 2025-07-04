@@ -1,5 +1,5 @@
 from django.db.models import F, Q, Count, Sum
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -308,3 +308,22 @@ class RoomsView(View):
             'rooms_counts': rooms.count()
         }
         return render(request, "rooms.html", context)
+
+class EditBookingDate(View):
+    def get(self, request, pk):
+        booking = get_object_or_404(Booking, id=pk)
+        form = BookingFormEditDate()
+        context = {
+            'booking': booking,
+            'form': form
+        }
+        return render(request, "edit_booking_date.html", context)
+    
+    def post(self, request, pk):
+        booking = get_object_or_404(Booking, id=pk)
+        form = BookingFormEditDate(request.POST, instance=booking)
+        if form.is_valid():
+            booking.save()
+            return redirect('/')
+        return render(request, "edit_booking_date.html", {"booking": booking, "form": form})
+        
